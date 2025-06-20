@@ -4,6 +4,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import UserForm from './modules/user/UserForm'
+import ProductList from './modules/product/ProductList'
+import OrderList from './modules/order/OrderList'
 import { Button } from 'antd'
 import {
   BrowserRouter as Router,
@@ -50,19 +52,35 @@ function Contact() {
   return <h2>Contacto</h2>
 }
 
-function App() {
+export default function App() {
   return (
     <Router>
       <nav className="p-4 bg-gray-100 mb-6">
         <ul className="flex gap-4">
           <li>
-            <Link to="/" className="text-blue-600 hover:underline">Inicio</Link>
+            <Link to="/" className="text-blue-600 hover:underline">
+              Inicio
+            </Link>
           </li>
           <li>
-            <Link to="/user" className="text-blue-600 hover:underline">User</Link>
+            <Link to="/user" className="text-blue-600 hover:underline">
+              User
+            </Link>
           </li>
           <li>
-            <Link to="/contact" className="text-blue-600 hover:underline">Contacto</Link>
+            <Link to="/products" className="text-blue-600 hover:underline">
+              Productos
+            </Link>
+          </li>
+          <li>
+            <Link to="/orders" className="text-blue-600 hover:underline">
+              Órdenes
+            </Link>
+          </li>
+          <li>
+            <Link to="/contact" className="text-blue-600 hover:underline">
+              Contacto
+            </Link>
           </li>
         </ul>
       </nav>
@@ -71,11 +89,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/user" element={<UserForm />} />
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/orders" element={<OrderList />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </main>
     </Router>
   )
 }
-
-export default App

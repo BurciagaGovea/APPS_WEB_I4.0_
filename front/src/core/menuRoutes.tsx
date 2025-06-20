@@ -2,6 +2,8 @@
 import React from 'react';
 import Dashboard from "../modules/dashboard/Dashboard";
 import UserForm from "../modules/user/UserForm";
+import ProductList from "../modules/product/ProductList";
+import OrderList   from "../modules/order/OrderList";
 
 export interface AppRoute {
   path: string;
@@ -34,6 +36,21 @@ const routes: AppRoute[] = [
     icon: 'UserOutlined',
     roleIds: ['665a1f2b40fd3a12b3e77611'],
   },
+
+  {
+    path: '/products',
+    element: <ProductList />,
+    label: 'Productos',
+    icon: 'UnorderedListOutlined',
+    roleIds: ['ADMIN_ROLE', 'USER_ROLE'],
+    },
+  {
+    path: '/orders',
+    element: <OrderList />,
+    label: 'Órdenes',
+    icon: 'ShoppingCartOutlined',
+    roleIds: ['ADMIN_ROLE', 'USER_ROLE'],
+    },
   // Si necesitas rutas ocultas (por ejemplo configuración o detalles)
   {
     path: '/settings',
