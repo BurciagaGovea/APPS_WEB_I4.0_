@@ -2,11 +2,11 @@
 import React from 'react';
 import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
-import MenuDynamic from './MenuDynamic.tsx';
+import MenuDynamic from '../MenuDynamic';
 
-const { Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 
-function Dashboard() {
+export default function Dashboard() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider width={220}>
@@ -14,7 +14,9 @@ function Dashboard() {
       </Sider>
 
       <Layout>
-        <Header />
+        <Header style={{ background: '#fff', padding: '0 16px' }}>
+          <h3 style={{ margin: 0 }}>Mi App</h3>
+        </Header>
 
         <Content
           style={{
@@ -26,10 +28,10 @@ function Dashboard() {
           <Outlet />
         </Content>
 
-        <Footer />
+        <Footer style={{ textAlign: 'center' }}>
+          ©2025 Mi Empresa
+        </Footer>
       </Layout>
     </Layout>
   );
 }
-
-export default Dashboard;

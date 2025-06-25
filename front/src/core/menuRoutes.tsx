@@ -4,6 +4,8 @@ import Dashboard from "../modules/dashboard/Dashboard";
 import UserForm from "../modules/user/UserForm";
 import ProductList from "../modules/product/ProductList";
 import OrderList   from "../modules/order/OrderList";
+import Login from '../modules/auth/Login';
+
 
 export interface AppRoute {
   path: string;
@@ -58,6 +60,12 @@ const routes: AppRoute[] = [
     label: 'Ajustes',
     icon: 'SettingOutlined',
     hidden: true,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+    label: 'Login'
+    // hidden: true  // no aparece en el menú
   },
 ];
 
