@@ -19,7 +19,9 @@ const options = [
   `w=majority`
 ].join('&');
 
-const mongoUri = `mongodb://${hosts}/${dbName}?${options}`;
+export const mongoUri = `mongodb://${hosts}/${dbName}?${options}`;
+
+
 
 export const connectDB = async (): Promise<void> => {
   try {
@@ -30,6 +32,7 @@ export const connectDB = async (): Promise<void> => {
     } as mongoose.ConnectOptions);
 
     console.log('MongoDB replica set conectado');
+    console.log(mongoUri)
   } catch (err) {
     console.error('Error al conectar con MongoDB:', err);
     process.exit(1);

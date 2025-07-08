@@ -1,10 +1,10 @@
-// src/modules/dashboard/MenuDynamic.tsx
-import React from 'react';
+// src/modules/MenuDynamic.tsx
+import React, { useEffect, useState } from 'react';
 import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
-import routes from '../core/menuRoutes'; // ajusta la ruta si la tienes diferente
+import axios from 'axios';
 
-// Importa aquí todos los íconos que uses en menuRoutes.tsx
+// Importa aquí todos los íconos que uses en la API
 import {
   HomeOutlined,
   DashboardOutlined,
@@ -24,21 +24,57 @@ const IconsMap = {
   SettingOutlined
 };
 
-export default function MenuDynamic() {
+interface MenuItem {
+  _id: string;
+  label: string;
+  path: string;
+  icon: string;
+  roles: string[];
+}
+
+const MenuDynamic: React.FC = () => {
+  const [menus, setMenus] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Genera los items del menú a partir de menuRoutes
-  const items = routes
-    .filter(route => !route.hidden)         // excluye las rutas ocultas
-    .map(route => {
-      const IconComp = IconsMap[route.icon as keyof typeof IconsMap];
-      return {
-        key: route.path,
-        icon: IconComp ? <IconComp /> : null,
-        label: route.label ?? route.path
-      };
-    });
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const res = await axios.get('http://localhost:3001/api/auth/menu');
+        console.log(res)
+        setMenus(res.data);
+      } catch (error) {
+        console.error('Error fetching menu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ 
+        color: 'white', 
+        padding: '1rem', 
+        textAlign: 'center' 
+      }}>
+        Cargando menú...
+      </div>
+    );
+  }
+
+  // Genera los items del menú a partir de la API
+  const items = menus.map(menu => {
+    const IconComp = IconsMap[menu.icon as keyof typeof IconsMap];
+    return {
+      key: menu.path,
+      icon: IconComp ? <IconComp /> : null,
+      label: menu.label
+    };
+  });
 
   return (
     <Menu
@@ -50,4 +86,6 @@ export default function MenuDynamic() {
       style={{ height: '100%', borderRight: 0 }}
     />
   );
-}
+};
+
+export default MenuDynamic;
