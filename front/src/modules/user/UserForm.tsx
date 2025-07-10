@@ -1,53 +1,89 @@
-import { Form, Input, Button } from "antd";
-import React from "react";
+import React, { useEffect, useState } from 'react';
+import { Table, Input, Button, Space } from 'antd';
+import axios from 'axios';
 
-function UserForm() {
-    const [form] = Form.useForm();
-    const title = "User Form";
+const { Search } = Input;
 
-    const handleSubmit = () => {
-        form.validateFields().then(values => {
-            console.log("Form values:", values);
-        }).catch(errorInfo => {
-            console.log("Validation Failed:", errorInfo);
-        });
-    }
-
-    return (
-        <>
-            <div><h1>{title}</h1></div>
-            <Form
-                form={form}
-                name="user-form"
-                layout="vertical"
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 20 }}
-            >
-                <Form.Item label="Horizontal" name="horizontal" rules={[{ required: true }]}>
-                    <Input />
-                </Form.Item>
-
-                <Form.Item label="Vertical" name="vertical" rules={[{ required: true }]}>
-                    <Input />
-                </Form.Item>
-
-                <Form.Item>
-                    <Button type="primary" onClick={handleSubmit}>
-                        Submit
-                    </Button>
-                </Form.Item>
-            </Form>
-        </>
-    );
+interface Role {
+  type: string;
+  name: string;
 }
 
-export default UserForm;
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  status: boolean;
+  role: Role[];
+  firstName: string;
+  lastName: string;
+}
 
+export default function UserData() {
+  const [rawData, setRawData] = useState<User[]>([]);
+  const [search, setSearch] = useState('');
 
-/*
-* 1.-CRUD completo de productos
-* (create, delete(stattus)m update y getAll)
-* 2.-Modificar modelo de usuario para recibir arreglo de roles
-* martes 17 junio
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/auth/users');
+        setRawData(res.data.userList || []);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-*/
+    fetchUsers();
+  }, []);
+
+  const filteredData = rawData.filter((u) =>
+    u.username.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const columns = [
+    {
+      title: 'Nombre',
+      dataIndex: 'username',
+      key: 'username',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      sorter: (a: User, b: User) => a.email.localeCompare(b.email),
+    },
+    {
+      title: 'Rol',
+      dataIndex: 'role',
+      key: 'role',
+      render: (roles: Role[]) => roles.map((r) => r.name).join(', '),
+    },
+    {
+      title: 'Acciones',
+      key: 'actions',
+      render: (_: any, record: User) => (
+        <Space>
+          <Button danger size="small">Editar</Button>
+          <Button danger size="small">Borrar</Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div className="p-4">
+      <Search
+        className="mb-4 w-60"
+        placeholder="Buscar usuario..."
+        onChange={(e) => setSearch(e.target.value)}
+        allowClear
+      />
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey="_id"
+        pagination={{ pageSize: 5 }}
+      />
+    </div>
+  );
+}

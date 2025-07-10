@@ -1,52 +1,104 @@
-// src/modules/order/OrderList.tsx
-import React, { useState, useEffect } from 'react';
-import { Table, Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Table, Input, Button, Space, Tag } from 'antd';
+import axios from 'axios';
+import moment from 'moment';
+
+const { Search } = Input;
+
+interface ProductInOrder {
+  productId: string;
+  quantity: number;
+  price: number;
+}
 
 interface Order {
-  id: number;
-  product: string;
-  quantity: number;
+  _id: string;
+  idUser: string;
+  status: string;
+  products: ProductInOrder[];
+  subtotal: number;
   total: number;
-  status: 'Pending' | 'Completed' | 'Cancelled';
+  Date: string;
 }
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const fake: Order[] = [
-      { id: 1001, product: 'Laptop',     quantity: 1, total: 1200, status: 'Pending'   },
-      { id: 1002, product: 'Smartphone', quantity: 2, total: 1600, status: 'Completed' },
-      { id: 1003, product: 'Café Molido',quantity: 5, total:   75, status: 'Cancelled' },
-    ];
-    setTimeout(() => setOrders(fake), 500);
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get('http://localhost:3002/api/auth/orders');
+        setOrders(res.data || []);
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
+  const filteredOrders = orders.filter((order) =>
+    order.idUser.toLowerCase().includes(search.toLowerCase())
+  );
+
   const columns = [
-    { title: 'ID Orden',    dataIndex: 'id',       key: 'id' },
-    { title: 'Producto',    dataIndex: 'product',  key: 'product' },
-    { title: 'Cantidad',    dataIndex: 'quantity', key: 'quantity' },
-    { title: 'Total',       dataIndex: 'total',    key: 'total',    render: (t: number) => `$${t}` },
+    {
+      title: 'Usuario',
+      dataIndex: 'idUser',
+      key: 'idUser',
+    },
     {
       title: 'Estado',
       dataIndex: 'status',
       key: 'status',
-      render: (s: Order['status']) => {
-        let color = s === 'Completed' ? 'green' : s === 'Pending' ? 'orange' : 'red';
-        return <Tag color={color}>{s}</Tag>;
-      }
+      render: (status: string) => (
+        <Tag color={status === 'Pendiente' ? 'orange' : 'green'}>{status}</Tag>
+      ),
+    },
+    {
+      title: 'Subtotal',
+      dataIndex: 'subtotal',
+      key: 'subtotal',
+      render: (value: number) => `$${value.toFixed(2)}`,
+    },
+    {
+      title: 'Total',
+      dataIndex: 'total',
+      key: 'total',
+      render: (value: number) => `$${value.toFixed(2)}`,
+    },
+    {
+      title: 'Fecha',
+      dataIndex: 'Date',
+      key: 'Date',
+      render: (date: string) => moment(date).format('YYYY-MM-DD HH:mm'),
+    },
+    {
+      title: 'Acciones',
+      key: 'actions',
+      render: (_: any, record: Order) => (
+        <Space>
+          <Button danger size="small">Editar</Button>
+          <Button danger size="small">Eliminar</Button>
+        </Space>
+      ),
     },
   ];
 
   return (
-    <div>
-      <h2>Listado de Órdenes</h2>
-      <Table<Order>
-        rowKey="id"
-        dataSource={orders}
+    <div className="p-4">
+      <Search
+        className="mb-4 w-60"
+        placeholder="Buscar por ID de usuario..."
+        onChange={(e) => setSearch(e.target.value)}
+        allowClear
+      />
+      <Table
         columns={columns}
-        loading={!orders.length}
-        pagination={false}
+        dataSource={filteredOrders}
+        rowKey="_id"
+        pagination={{ pageSize: 5 }}
       />
     </div>
   );

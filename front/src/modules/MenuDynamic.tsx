@@ -41,7 +41,7 @@ const MenuDynamic: React.FC = () => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const res = await axios.get('http://localhost:3001/api/auth/menu');
+        const res = await axios.get('http://localhost:3009/api/auth/menu');
         console.log(res)
         setMenus(res.data);
       } catch (error) {
