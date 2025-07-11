@@ -1,15 +1,5 @@
 import mongoose from "mongoose";
 
-// const mongoUri = "mongodb://127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019/?replicaSet=rs0";
-// const connectDB = async (): Promise<void> => {
-//     try{
-//         await mongoose.connect(mongoUri);
-//         console.log("Connected")
-//     }catch(error){
-//         console.error(error)
-//     }
-// }
-
 const hosts = '127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019';
 const dbName = 'PRUEBA';  // pon aquí tu BD, o déjalo vacío para usar 'test'
 const replicaSet = 'rs0';

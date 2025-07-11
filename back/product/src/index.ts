@@ -5,7 +5,7 @@ import connectDB from './config/db';
 import cors from 'cors';
 
 const app = express();
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3010;
 
 app.use(express.json());
 app.use(morgan('dev'));
