@@ -20,6 +20,7 @@ interface ProductModalFormProps {
   isEditing: boolean;
   onSave: (productData: any) => void;
   onCancel: () => void;
+  loading?: boolean;
 }
 
 export default function ProductModalForm({ 
@@ -27,7 +28,8 @@ export default function ProductModalForm({
   product, 
   isEditing, 
   onSave, 
-  onCancel 
+  onCancel,
+  loading = false
 }: ProductModalFormProps) {
   const [form] = Form.useForm();
 
@@ -57,9 +59,11 @@ export default function ProductModalForm({
   const handleOk = () => {
     form.validateFields().then(values => {
       const productData = {
-        ...values,
-        createDate: isEditing ? product?.createDate : new Date().toISOString(),
-        deleteDate: null,
+        name: values.name,
+        price: values.price,
+        Qty: values.Qty,
+        desc: values.desc,
+        status: values.status
       };
       
       if (isEditing && product) {
@@ -67,15 +71,16 @@ export default function ProductModalForm({
       }
       
       onSave(productData);
-      form.resetFields();
     }).catch(info => {
       console.log('Validate Failed:', info);
     });
   };
 
   const handleCancel = () => {
-    form.resetFields();
-    onCancel();
+    if (!loading) {
+      form.resetFields();
+      onCancel();
+    }
   };
 
   return (
@@ -87,11 +92,15 @@ export default function ProductModalForm({
       width={600}
       okText={isEditing ? 'Actualizar' : 'Agregar'}
       cancelText="Cancelar"
+      confirmLoading={loading}
+      closable={!loading}
+      maskClosable={!loading}
     >
       <Form
         form={form}
         layout="vertical"
         name="productForm"
+        disabled={loading}
       >
         <Row gutter={16}>
           <Col span={12}>
@@ -144,7 +153,7 @@ export default function ProductModalForm({
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          {/* <Col span={12}>
             <Form.Item
               label="Estado"
               name="status"
@@ -155,7 +164,7 @@ export default function ProductModalForm({
                 unCheckedChildren="Inactivo"
               />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
 
         <Row gutter={16}>

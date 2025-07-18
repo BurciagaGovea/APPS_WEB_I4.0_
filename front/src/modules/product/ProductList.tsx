@@ -24,6 +24,7 @@ export default function ProductList() {
   const [visible, setVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -67,18 +68,57 @@ export default function ProductList() {
   };
 
   const handleSave = async (productData: any) => {
+    setLoading(true);
     try {
-      if (isEditing) {
-        console.log('Editando producto:', productData);
-        message.success('Producto actualizado correctamente');
+      if (isEditing && editingProduct) {
+        // Lógica para editar producto
+        const updateData = {
+          name: productData.name,
+          price: productData.price,
+          Qty: productData.Qty,
+          desc: productData.desc
+        };
+
+        const response = await axios.put(
+          `http://localhost:3010/api/auth/product/${editingProduct._id}`,
+          updateData
+        );
+
+        if (response.data.product) {
+          message.success('Producto actualizado correctamente');
+          setVisible(false);
+          fetchProducts(); // Recargar la lista después de actualizar
+        }
       } else {
-        console.log('Agregando nuevo producto:', productData);
+        // Lógica para agregar nuevo producto
+        const createData = {
+          name: productData.name,
+          price: productData.price,
+          Qty: productData.Qty,
+          desc: productData.desc,
+          status: productData.status || true
+        };
+
+        // Aquí necesitarías la ruta para crear producto
+        const response = await axios.post(
+          'http://localhost:3010/api/auth/product',
+          createData
+        );
+
         message.success('Producto agregado correctamente');
+        setVisible(false);
+        fetchProducts(); // Recargar la lista después de agregar
       }
-      setVisible(false);
-      // fetchProducts(); // Recargar la lista después de guardar
-    } catch (error) {
-      message.error('Error al guardar producto');
+    } catch (error: any) {
+      console.error('Error al guardar producto:', error);
+      
+      if (error.response?.status === 404) {
+        message.error('Producto no encontrado');
+      } else {
+        message.error(error.response?.data?.message || 'Error al guardar producto');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,6 +172,7 @@ export default function ProductList() {
             type="primary" 
             size="small"
             onClick={() => handleEdit(record)}
+            loading={loading}
           >
             Editar
           </Button>
@@ -139,6 +180,7 @@ export default function ProductList() {
             danger 
             size="small"
             onClick={() => handleDelete(record._id)}
+            loading={loading}
           >
             Eliminar
           </Button>
@@ -160,6 +202,7 @@ export default function ProductList() {
           type="primary" 
           icon={<PlusOutlined />}
           onClick={handleAdd}
+          loading={loading}
         >
           Agregar Producto
         </Button>
@@ -170,6 +213,7 @@ export default function ProductList() {
         dataSource={filteredProducts}
         rowKey="_id"
         pagination={{ pageSize: 5 }}
+        loading={loading}
       />
 
       <ProductModalForm
@@ -178,6 +222,7 @@ export default function ProductList() {
         isEditing={isEditing}
         onSave={handleSave}
         onCancel={handleCancel}
+        loading={loading}
       />
     </div>
   );

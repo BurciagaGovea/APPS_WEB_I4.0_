@@ -62,7 +62,7 @@ export default function OrderList() {
 
   const handleDelete = async (orderId: string) => {
     try {
-      // Aquí iría la lógica de eliminación cuando conectes con el backend
+      // Aquí iría la lógica de eliminación cuando tengas el endpoint
       console.log('Eliminar orden:', orderId);
       message.success('Orden eliminada correctamente');
       // fetchOrders(); // Recargar la lista después de eliminar
@@ -73,17 +73,46 @@ export default function OrderList() {
 
   const handleSave = async (orderData: any) => {
     try {
-      if (isEditing) {
-        console.log('Editando orden:', orderData);
-        message.success('Orden actualizada correctamente');
+      if (isEditing && editingOrder) {
+        // Editar orden existente
+        const response = await axios.put(
+          `http://localhost:3002/api/auth/orders/${editingOrder._id}`,
+          {
+            idUser: orderData.idUser,
+            products: orderData.products,
+            status: orderData.status
+          }
+        );
+        
+        if (response.status === 200) {
+          message.success('Orden actualizada correctamente');
+          setVisible(false);
+          fetchOrders(); // Recargar la lista
+        }
       } else {
-        console.log('Agregando nueva orden:', orderData);
-        message.success('Orden agregada correctamente');
+        // Crear nueva orden
+        const response = await axios.post(
+          'http://localhost:3002/api/auth/orders',
+          {
+            idUser: orderData.idUser,
+            products: orderData.products
+          }
+        );
+        
+        if (response.status === 201) {
+          message.success('Orden creada correctamente');
+          setVisible(false);
+          fetchOrders(); // Recargar la lista
+        }
       }
-      setVisible(false);
-      // fetchOrders(); // Recargar la lista después de guardar
-    } catch (error) {
-      message.error('Error al guardar orden', error);
+    } catch (error: any) {
+      console.error('Error al guardar orden:', error);
+      
+      if (error.response?.data?.message) {
+        message.error(error.response.data.message);
+      } else {
+        message.error(isEditing ? 'Error al actualizar orden' : 'Error al crear orden');
+      }
     }
   };
 

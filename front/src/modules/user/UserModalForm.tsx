@@ -24,6 +24,7 @@ interface UserModalFormProps {
   isEditing: boolean;
   onSave: (userData: any) => void;
   onCancel: () => void;
+  loading?: boolean;
 }
 
 export default function UserModalForm({ 
@@ -31,7 +32,8 @@ export default function UserModalForm({
   user, 
   isEditing, 
   onSave, 
-  onCancel 
+  onCancel,
+  loading = false
 }: UserModalFormProps) {
   const [form] = Form.useForm();
 
@@ -62,7 +64,7 @@ export default function UserModalForm({
       const userData = {
         ...values,
         role: values.roles?.map((roleName: string) => ({
-          type: 'user', // Puedes ajustar esto según tus necesidades
+          type: roleName, // Usando el nombre del rol como tipo también
           name: roleName
         })) || []
       };
@@ -72,15 +74,16 @@ export default function UserModalForm({
       }
       
       onSave(userData);
-      form.resetFields();
     }).catch(info => {
       console.log('Validate Failed:', info);
     });
   };
 
   const handleCancel = () => {
-    form.resetFields();
-    onCancel();
+    if (!loading) {
+      form.resetFields();
+      onCancel();
+    }
   };
 
   return (
@@ -92,11 +95,15 @@ export default function UserModalForm({
       width={600}
       okText={isEditing ? 'Actualizar' : 'Agregar'}
       cancelText="Cancelar"
+      confirmLoading={loading}
+      closable={!loading}
+      maskClosable={!loading}
     >
       <Form
         form={form}
         layout="vertical"
         name="userForm"
+        disabled={loading}
       >
         <Row gutter={16}>
           <Col span={12}>
@@ -171,7 +178,7 @@ export default function UserModalForm({
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          {/* <Col span={12}>
             <Form.Item
               label="Estado"
               name="status"
@@ -182,7 +189,7 @@ export default function UserModalForm({
                 unCheckedChildren="Inactivo"
               />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
 
         {!isEditing && (

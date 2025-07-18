@@ -82,11 +82,19 @@ export default function OrderModalForm({
         return;
       }
 
+      // Validar que todos los productos tengan datos completos
+      const incompleteProducts = products.filter(p => !p.productId || p.quantity <= 0 || p.price <= 0);
+      if (incompleteProducts.length > 0) {
+        message.error('Todos los productos deben tener ID, cantidad y precio válidos');
+        return;
+      }
+
       const orderData = {
-        ...values,
+        idUser: values.idUser,
         products: products,
         subtotal: subtotal,
         total: total,
+        status: values.status,
         Date: isEditing ? order?.Date : new Date().toISOString(),
       };
       
@@ -95,8 +103,6 @@ export default function OrderModalForm({
       }
       
       onSave(orderData);
-      form.resetFields();
-      setProducts([]);
     }).catch(info => {
       console.log('Validate Failed:', info);
     });
@@ -105,6 +111,8 @@ export default function OrderModalForm({
   const handleCancel = () => {
     form.resetFields();
     setProducts([]);
+    setSubtotal(0);
+    setTotal(0);
     onCancel();
   };
 
@@ -228,6 +236,7 @@ export default function OrderModalForm({
                 <Option value="En proceso">En proceso</Option>
                 <Option value="Completado">Completado</Option>
                 <Option value="Cancelado">Cancelado</Option>
+                <Option value="Pagado">Pagado</Option>
               </Select>
             </Form.Item>
           </Col>

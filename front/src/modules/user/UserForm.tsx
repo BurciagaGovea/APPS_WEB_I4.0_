@@ -27,6 +27,7 @@ export default function UserForm() {
   const [visible, setVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -70,20 +71,74 @@ export default function UserForm() {
   };
 
   const handleSave = async (userData: any) => {
+    setLoading(true);
     try {
-      if (isEditing) {
+      if (isEditing && editingUser) {
         // Lógica para editar usuario
-        console.log('Editando usuario:', userData);
-        message.success('Usuario actualizado correctamente');
+        const updateData = {
+          username: userData.username,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          role: userData.role, // Ya viene formateado del UserModalForm
+          status: userData.status
+        };
+
+        const response = await axios.put(
+          `http://localhost:3000/api/auth/users/update/${editingUser._id}`,
+          updateData
+        );
+
+        if (response.data.updatedUser) {
+          message.success('Usuario actualizado correctamente');
+          setVisible(false);
+          fetchUsers(); // Recargar la lista después de actualizar
+        }
       } else {
         // Lógica para agregar nuevo usuario
-        console.log('Agregando nuevo usuario:', userData);
+        const createData = {
+          username: userData.username,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          password: userData.password,
+          role: userData.role,
+          status: userData.status
+        };
+
+        // Aquí necesitarías la ruta para crear usuario
+        // const response = await axios.post(
+        //   'http://localhost:3000/api/auth/users/create',
+        //   createData
+        // );
+        const response = await axios.post(
+             'http://localhost:3000/api/auth/users',
+             {
+               username: createData.username,
+               email:    createData.email,
+               firstName:createData.firstName,
+               lastName: createData.lastName,
+               password: createData.password,
+               role:     createData.role
+             }
+           );
+
         message.success('Usuario agregado correctamente');
+        setVisible(false);
+        fetchUsers(); // Recargar la lista después de agregar
       }
-      setVisible(false);
-      // fetchUsers(); // Recargar la lista después de guardar
-    } catch (error) {
-      message.error('Error al guardar usuario');
+    } catch (error: any) {
+      console.error('Error al guardar usuario:', error);
+      
+      if (error.response?.status === 426) {
+        message.error('El correo ya existe');
+      } else if (error.response?.status === 404) {
+        message.error('Usuario no encontrado');
+      } else {
+        message.error(error.response?.data?.message || 'Error al guardar usuario');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +185,7 @@ export default function UserForm() {
             type="primary" 
             size="small"
             onClick={() => handleEdit(record)}
+            loading={loading}
           >
             Editar
           </Button>
@@ -137,6 +193,7 @@ export default function UserForm() {
             danger 
             size="small"
             onClick={() => handleDelete(record._id)}
+            loading={loading}
           >
             Eliminar
           </Button>
@@ -158,6 +215,7 @@ export default function UserForm() {
           type="primary" 
           icon={<PlusOutlined />}
           onClick={handleAdd}
+          loading={loading}
         >
           Agregar Usuario
         </Button>
@@ -168,6 +226,7 @@ export default function UserForm() {
         dataSource={filteredData}
         rowKey="_id"
         pagination={{ pageSize: 5 }}
+        loading={loading}
       />
 
       <UserModalForm
@@ -176,6 +235,7 @@ export default function UserForm() {
         isEditing={isEditing}
         onSave={handleSave}
         onCancel={handleCancel}
+        loading={loading}
       />
     </div>
   );
